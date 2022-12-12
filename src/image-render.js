@@ -4,7 +4,7 @@ function render(images) {
   const markup = images
     .map(image => {
       return `<a class="image-link" href="${image.largeImageURL}"><div class="photo-card">
-      <img src="${image.webformatURL}" alt="${image.tags}" width= 300px height = 150px loading="lazy" />
+      <img src="${image.webformatURL}" alt="${image.tags}" width= 300px min-height = 150px loading="lazy" />
         <div class="info">
           <p class="info-item">
             <b>Likes: ${image.likes}</b>
