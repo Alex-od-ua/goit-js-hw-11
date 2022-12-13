@@ -10,5 +10,5 @@ async function fetchImage(q, page, perPage) {
     `${BASE_URL}?key=${KEY}&q=${q}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${perPage}`
   );
 
-  return response;
+  return response.data;
 }

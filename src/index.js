@@ -20,14 +20,14 @@ const refs = {
 
 let simpleLightBox;
 let page = 1;
-let query = '';
+let searchQuery = '';
 const limit = 40;
 
 refs.searchForm.addEventListener('submit', onSearchForm);
 refs.loadMoreBtn.addEventListener('click', onLoadMoreBtn);
 refs.loadMoreBtn.classList.add('is-hidden');
 
-function onSearchForm(event) {
+async function onSearchForm(event) {
   event.preventDefault();
 
   query = event.currentTarget.searchQuery.value.trim();
@@ -41,45 +41,51 @@ function onSearchForm(event) {
     failureEmptyString();
     return;
   }
-  fetchImage(query, page, limit)
-    .then(({ data }) => {
-      if (data.totalHits === 0) {
-        alertTryAgain();
-      } else if (data.hits > limit) {
-        refs.loadMoreBtn.classList.remove('is-hidden');
-      } else {
-        refs.gallery.insertAdjacentHTML('beforeend', render(data.hits));
-        simpleLightBox = new SimpleLightbox('.gallery a').refresh();
-        successAnswer(data.totalHits);
-        refs.loadMoreBtn.classList.remove('is-hidden');
-      }
-    })
-    .catch(error => console.log(error))
-    .finally(() => {
+
+  const response = await fetchImage(query, page, limit);
+
+  if (response.totalHits > limit) {
+    refs.loadMoreBtn.classList.remove('is-hidden');
+  } else {
+    refs.loadMoreBtn.classList.add('is-hidden');
+  }
+
+  try {
+    if (response.totalHits === 0) {
+      alertTryAgain();
       refs.searchForm.reset();
-    });
+    } else {
+      refs.gallery.insertAdjacentHTML('beforeend', render(response.hits));
+      simpleLightBox = new SimpleLightbox('.gallery a').refresh();
+      successAnswer(response.totalHits);
+      refs.searchForm.reset();
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
 }
 
-function onLoadMoreBtn(event) {
+async function onLoadMoreBtn(event) {
   event.preventDefault();
 
   page += 1;
-  simpleLightBox.destroy();
 
   refs.loadMoreBtn.classList.remove('is-hidden');
 
-  fetchImage(query, page, limit)
-    .then(({ data }) => {
-      refs.gallery.insertAdjacentHTML('beforeend', render(data.hits));
-      simpleLightBox = new SimpleLightbox('.gallery a').refresh();
+  const response = await fetchImage(query, page, limit);
+  try {
+    refs.gallery.insertAdjacentHTML('beforeend', render(response.hits));
+    simpleLightBox = new SimpleLightbox('.gallery a').refresh();
 
-      const totalNumberImages = Math.ceil(data.hits / limit);
+    const totalNumberImages = response.totalHits / limit;
+    // onScroll();
 
-      if (page > totalNumberImages) {
-        warningEndOfSearch();
+    if (page > totalNumberImages) {
+      warningEndOfSearch();
 
-        refs.loadMoreBtn.classList.add('is-hidden');
-      }
-    })
-    .catch(error => console.log(error));
+      refs.loadMoreBtn.classList.add('is-hidden');
+    }
+  } catch (error) {
+    console.log(error.message);
+  }
 }
