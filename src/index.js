@@ -20,7 +20,7 @@ const refs = {
 
 let simpleLightBox;
 let page = 1;
-let searchQuery = '';
+let query = '';
 const limit = 40;
 
 refs.searchForm.addEventListener('submit', onSearchForm);
@@ -78,7 +78,6 @@ async function onLoadMoreBtn(event) {
     simpleLightBox = new SimpleLightbox('.gallery a').refresh();
 
     const totalNumberImages = response.totalHits / limit;
-    // onScroll();
 
     if (page > totalNumberImages) {
       warningEndOfSearch();
